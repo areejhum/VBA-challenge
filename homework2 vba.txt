@@ -1,116 +1,109 @@
-Sub alphabeticaltesting():
+Sub tickertotaler_moderate()
 
-    Dim ticker As String
-    Dim yearly_change As Double
-    Dim percent_change As Double
-    Dim total_vol As Long
-    Dim Summary_Table_Row As Integer
-    Dim lastRow As Long
-    Dim vol As Long
-    Dim year_open As Double
-    Dim year_close As Double
 
+
+'define everything
+Dim ws As Worksheet
+Dim ticker As String
+Dim vol As Integer
+Dim year_open As Double
+Dim year_close As Double
+Dim yearly_change As Double
+Dim percent_change As Double
+Dim Summary_Table_Row As Integer
+Dim Lastrow As Integer
 
 
 'this prevents my overflow error
-    On Error Resume Next
+On Error Resume Next
+
+Lastrow = Cells(Rows.Count, 1).End(xlUp).Row
+
 
 'run through each worksheet
-For Each ws In Worksheets
+For Each ws In ThisWorkbook.Worksheets
     'set headers
     ws.Cells(1, 9).Value = "Ticker"
     ws.Cells(1, 10).Value = "Yearly Change"
     ws.Cells(1, 11).Value = "Percent Change"
     ws.Cells(1, 12).Value = "Total Stock Volume"
 
-   lastRow = ws.combined_sheet.Cells(Rows.Count, "A").End(xlUp).Row
+    'setup integers for loop
+    Summary_Table_Row = 2
 
     'loop
-    For I = 2 To lastRow
-        
-          Summary_Table_Row = 2
-
-        If ws.Cells(I + 1, 1).Value <> ws.Cells(I, 1).Value Then
+        For I = 2 To Lastrow
+             If ws.Cells(I + 1, 1).Value <> ws.Cells(I, 1).Value Then
             
             'find all the values
             ticker = ws.Cells(I, 1).Value
-            vol = vol+ ws.Cells(I, 7).Value
+            vol = vol + ws.Cells(I, 7).Value
             
-
+            Range("I" & Summary_Table_Row).Value = ticker
+            Range("L" & Summary_Table_Row).Value = vol
             
-            'insert values into summary
-            Summary_Table_Row = Summary_Table_Row + 1
-            Range("I" & summary_ticker_row).Value = tickername
-             Range("L" & summary_ticker_row).Value = tickervolume
-
             
-
-             close_price = Cells(i, 6).Value
-             
-             yearly_change = (close_price - open_price)        
-              Range("J" & summary_ticker_row).Value = yearly_change
-       
-
-            total_vol = ws.Cells(I, 7).Value +1
-
-            
-            'Check for the non-divisibilty condition when calculating the percent change
-                If (open_price = 0) Then
-
-                    percent_change = 0
-
-                Else
-                    
-                    percent_change = yearly_change / open_price
-
-            
+        Range("J" & Summary_Table_Row).Value = yearly_change
         
+        'check for the non-divisibilty condition when calculating the percentchange
+        
+
+            year_open = ws.Cells(I, 3).Value
+            year_close = ws.Cells(I, 6).Value
+
+            yearly_change = year_close - year_open
          End If
-
-'finish loop
-           
-         Range("K" & summary_ticker_row).Value = percent_change
-              Range("K" & summary_ticker_row).NumberFormat = "0.00%"
-   
-              summary_ticker_row = summary_ticker_row + 1
+         
+            
+        If year_close = 0 Then
+        percent_change = 0
         
+            percent_change = (year_close - year_open) / year_close
 
-           total_vol = 0
-           open_price = Cells(i + 1, 3)
+            'insert values into summary
+            ws.Cells(Summary_Table_Row, 9).Value = ticker
+            ws.Cells(Summary_Table_Row, 10).Value = yearly_change
+            ws.Cells(Summary_Table_Row, 11).Value = percent_change
+            ws.Cells(Summary_Table_Row, 12).Value = vol
+            Summary_Table_Row = Summary_Table_Row + 1
 
-        year_open = ws.Cells(I, 3).Value
-        year_close = ws.Cells(j, 6).Value
-Else
-
-tickervolume = tickervolume + Cells(i, 7).Value
-
+             vol = 0
+             'reset the opening price
+             year_open = Cells(I + 1, 3).Value
+             Else
+             'Add the volume of trade
+             vol = vol + Cells(I, 7).Value
+             
+             
+             
         
-
         End If
 
-     Next I
+'finish loop
+    Next I
     
- lastrow_summary_table = Cells(Rows.Count, 9).End(xlUp).Row
- 
+ws.Columns("K").NumberFormat = "0.00%"
+
+
     'format columns colors
-     Dim A As Range
-     Dim b As Long
-     Dim c As Long
-     Dim color_cell As Range
+    Dim rg As Range
+    Dim g As Long
+    Dim c As Long
+    Dim color_cell As Range
     
-     Set rg = ws.Range("J2", Range("J2").End(xlDown))
-     c = rg.Cells.Count
+    Set rg = ws.Range("J2", Range("J2").End(xlDown))
+    c = rg.Cells.Count
     
     For g = 1 To c
     Set color_cell = rg(g)
     Select Case color_cell
         Case Is >= 0
             With color_cell
-                .Interior.ColorIndex = 4
+                .Interior.Color = vbGreen
             End With
         Case Is < 0
             With color_cell
-                .Interior.ColorIndex = 3
+                .Interior.Color = vbRed
             End With
        End Select
     Next g
@@ -123,4 +116,3 @@ Next ws
 
 
 End Sub
-
